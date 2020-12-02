@@ -22,9 +22,7 @@ def check_password_part_1(line):
 
 def check_password_part_2(line):
     pos1, pos2, character, search_string = split_line(line)
-    if search_string[pos1 - 1] == character and search_string[pos2 - 1] != character:
-        return 1
-    elif search_string[pos1 - 1] != character and search_string[pos2 - 1] == character:
+    if (search_string[pos1 - 1] == character) != (search_string[pos2 - 1] == character):
         return 1
     else:
         return 0
