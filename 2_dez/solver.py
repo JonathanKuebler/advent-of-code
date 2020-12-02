@@ -1,5 +1,6 @@
 import re
 
+
 def split_line(line):
     split = line.split(" ")
     positions = split[0].split("-")
@@ -9,6 +10,7 @@ def split_line(line):
     pos2 = int(positions[1])
     return pos1, pos2, character, search_string
 
+
 def check_password_part_1(line):
     min, max, character, search_string = split_line(line)
     number = len(re.findall(character, search_string))
@@ -17,14 +19,16 @@ def check_password_part_1(line):
     else:
         return 0
 
+
 def check_password_part_2(line):
     pos1, pos2, character, search_string = split_line(line)
-    if search_string[pos1-1] == character and search_string[pos2-1] != character:
+    if search_string[pos1 - 1] == character and search_string[pos2 - 1] != character:
         return 1
-    elif search_string[pos1-1] != character and search_string[pos2-1] == character:
+    elif search_string[pos1 - 1] != character and search_string[pos2 - 1] == character:
         return 1
     else:
         return 0
+
 
 with open("input", "r") as input:
     lines = input.read().rstrip().split("\n")
