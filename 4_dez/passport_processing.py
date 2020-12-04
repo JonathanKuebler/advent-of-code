@@ -20,6 +20,7 @@ schema = Schema(
             lambda e: e in ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"],
         ),
         "pid": And(str, Regex(r"^[0-9]{9}$")),
+        Optional("cid"): And(str),
     }
 )
 
