@@ -35,9 +35,8 @@ def count_gold_bags(list_of_bags, counter, next_to_find):
     return counter
 
 
-def find_bags_in_bag(list_of_bags, counter, color, multiplier):
+def find_bags_in_bag(list_of_bags, counter, color):
     next_bags = []
-    print(counter)
     for bag in list_of_bags:
         if bag.color == color:
             for index, next_bag in enumerate(bag.can_hold):
@@ -48,7 +47,7 @@ def find_bags_in_bag(list_of_bags, counter, color, multiplier):
 
     for next_bag in next_bags:
         counter = counter + (
-            next_bag[1] * find_bags_in_bag(list_of_bags, 1, next_bag[0], next_bag[1])
+            next_bag[1] * find_bags_in_bag(list_of_bags, 1, next_bag[0])
         )
     return counter
 
@@ -82,4 +81,4 @@ with open("input", "r") as input:
 
     list_of_bags = create_list_of_bags(rules)
 
-    print(find_bags_in_bag(list_of_bags, 0, "shiny gold bag", 1))
+    print(find_bags_in_bag(list_of_bags, 0, "shiny gold bag"))

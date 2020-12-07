@@ -51,5 +51,5 @@ def test_find_gold_bag():
 
 
 def test_find_number_of_bags():
-    assert find_bags_in_bag(list_of_bags_2, 0, "shiny gold bag", 1) == 126
-    assert find_bags_in_bag(list_of_bags_1, 0, "shiny gold bag", 1) == 32
+    assert find_bags_in_bag(list_of_bags_2, 0, "shiny gold bag") == 126
+    assert find_bags_in_bag(list_of_bags_1, 0, "shiny gold bag") == 32
