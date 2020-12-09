@@ -11,6 +11,7 @@ def find_part_1(xmas):
         ]
         if len(result) == 0:
             return xmas[index + 25]
+    return False
 
 
 def find_part_2(xmas, invalid_number):
