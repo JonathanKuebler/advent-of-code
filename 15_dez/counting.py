@@ -25,6 +25,6 @@
 # *_, sol = next(dict, 30000000)
 # print(sol)
 
-print("The Solution to Part 2 is 1373")
+print("The Solution to Part 1 is 1373")
 
 print("The Solution to Part 2 is 112458")
