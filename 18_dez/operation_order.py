@@ -68,18 +68,3 @@ with open("input", "r") as input:
         expression = compute_part2(expression)
         sum_of_all += expression
     print(sum_of_all)
-
-    # expressions = [list(expression) for expression in expressions]
-    # expressions = [
-    #     [part for part in expression if part != " "] for expression in expressions
-    # ]
-    # for expression in expressions:
-    #     start_indices = []
-    #     end_indices = []
-    #     for index in range(len(expression)):
-    #         if expression[index] == "(":
-    #             start_indices.append(index)
-    #         elif expression[index] == ")":
-    #             end_indices.append(index)
-    #     if max(start_indices) > min(end_indices):
-    #         print("OH NO!")
