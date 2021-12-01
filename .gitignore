@@ -1,3 +1,8 @@
 __pycache__
 .env
 .pytest*
+node_modules
+package.json
+package-lock.json
+tsconfig.json
+*.js
