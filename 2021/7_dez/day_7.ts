@@ -14,32 +14,32 @@ function getCost(goal: number, position: number): number {
 }
 
 
-function getCostPar1(craps: number[]): number {
-    craps = craps.sort(function (a, b) {
+function getCostPar1(crabs: number[]): number {
+    crabs = crabs.sort(function (a, b) {
         return a - b;
     });
 
-    let median = craps[(craps.length / 2)];
+    let median = crabs[(crabs.length / 2)];
 
     let fuelCost = 0;
 
-    for (let index in craps) {
-        fuelCost += Math.abs(craps[index] - median);
+    for (let index in crabs) {
+        fuelCost += Math.abs(crabs[index] - median);
     }
     return fuelCost
 }
 
-function getCostPart2(craps: number[]): number {
-    craps = craps.sort(function (a, b) {
+function getCostPart2(crabs: number[]): number {
+    crabs = crabs.sort(function (a, b) {
         return a - b;
     });
 
-    let median = craps[(craps.length / 2)];
+    let median = crabs[(crabs.length / 2)];
 
     let newCost: { [med: number]: number } = {};
     for (let search = median - 500; search < median + 500; search++) {
         let tmp = 0;
-        for (let el of craps) {
+        for (let el of crabs) {
             tmp += getCost(search, el);
         }
         newCost[search] = tmp;
@@ -58,11 +58,11 @@ function getCostPart2(craps: number[]): number {
 }
 
 
-let craps = load_input()
-let fuelCost = getCostPar1(craps)
+let crabs = load_input()
+let fuelCost = getCostPar1(crabs)
 console.log(fuelCost)
 
 
-craps = load_input()
-let winner = getCostPart2(craps)
+crabs = load_input()
+let winner = getCostPart2(crabs)
 console.log(winner)
