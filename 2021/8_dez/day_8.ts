@@ -1,16 +1,13 @@
-import { SlowBuffer } from 'buffer';
 import * as fs from 'fs';
 
-interface possible { "a": string, "b": string, "c": string, "d": string, "e": string, "f": string, "g": string }
-
 function load_input() {
-    let input = fs.readFileSync('input', 'utf8').split("\n")
-    let solution = input.map(x => x.split(" | "))
-    return solution
+    let input = fs.readFileSync('input', 'utf8').split("\n");
+    let solution = input.map(x => x.split(" | "));
+    return solution;
 }
 
 function getIntersect(a: string, b: string) {
-    let res = ""
+    let res = "";
     for (let str of a.split("")) {
         if (b.includes(str)) {
             res += str;
@@ -20,7 +17,7 @@ function getIntersect(a: string, b: string) {
 }
 
 function getANotinB(a: string, b: string) {
-    let res = ""
+    let res = "";
     for (let str of a.split("")) {
         if (!b.includes(str)) {
             res += str;
@@ -42,85 +39,89 @@ function getSimpleNumbers(): number {
 }
 
 function getSumOfOutputs(): number {
+
+    function convertDisplayStringToNumber(sol: any, possible: any) {
+        for (let so of sol) {
+            if (so.length === 2) {
+                counter += 1;
+            } else if (so.length === 3) {
+                counter += 7;
+            } else if (so.length === 4) {
+                counter += 4;
+            } else if (so.length === 7) {
+                counter += 8;
+            } else if (!so.includes(possible["f"]) && !so.includes(possible["b"])) {
+                counter += 2;
+            } else if (!so.includes(possible["b"]) && !so.includes(possible["e"])) {
+                counter += 3;
+            } else if (!so.includes(possible["c"]) && !so.includes(possible["e"])) {
+                counter += 5;
+            } else if (so.includes(possible["e"]) && !so.includes(possible["c"])) {
+                counter += 6;
+            } else if (so.includes(possible["e"])) {
+                counter += 0;
+            } else {
+                counter += 9;
+            }
+        }
+    }
+
     let input = load_input();
 
     let sum = 0;
-    let counter = ""
+    let counter = "";
 
     for (let inpt of input) {
         let sol = inpt[1].split(" ");
         inpt = inpt[0].split(" ").sort((a, b) => a.length - b.length);
-        let possible: any = { "a": "", "b": "", "c": "", "d": "", "e": "", "f": "", "g": "" }
+        let possible: any = { "a": "", "b": "", "c": "", "d": "", "e": "", "f": "", "g": "" };
         for (let nbrs of inpt) {
             if (nbrs.length === 2) {
-                possible["c"] += nbrs
-                possible["f"] += nbrs
+                possible["c"] += nbrs;
+                possible["f"] += nbrs;
             } else if (nbrs.length === 3) {
-                possible["c"] = getIntersect(possible["c"], nbrs)
-                possible["f"] = getIntersect(possible["f"], nbrs)
-                possible["a"] = getANotinB(getANotinB(nbrs, possible["c"]), possible["f"])
-
+                possible["a"] = getANotinB(getANotinB(nbrs, possible["c"]), possible["f"]);
             } else if (nbrs.length === 4) {
-                possible["b"] = getANotinB(getANotinB(nbrs, possible["c"]), possible["f"])
-                possible["c"] = getIntersect(possible["c"], nbrs)
-                possible["d"] = getANotinB(getANotinB(nbrs, possible["c"]), possible["f"])
-                possible["f"] = getIntersect(possible["f"], nbrs)
+                possible["b"] = getANotinB(getANotinB(nbrs, possible["c"]), possible["f"]);
+                possible["d"] = getANotinB(getANotinB(nbrs, possible["c"]), possible["f"]);
             } else if (nbrs.length === 7) {
-                possible["e"] = getANotinB(getANotinB(getANotinB(getANotinB(getANotinB(nbrs, possible["c"]), possible["f"]), possible["a"]), possible["b"]), possible["d"])
-                possible["g"] = getIntersect(possible["g"], getANotinB(getANotinB(getANotinB(getANotinB(getANotinB(nbrs, possible["c"]), possible["f"]), possible["a"]), possible["b"]), possible["d"]))
-            } else if (nbrs.length != 6) {
-                possible["d"] = getIntersect(possible["d"], nbrs)
-                if (possible["g"].length != 0) {
-                    possible["g"] = getIntersect(getANotinB(nbrs, possible["a"]), possible["g"])
+                possible["e"] = getANotinB(getANotinB(getANotinB(getANotinB(getANotinB(nbrs, possible["c"]), possible["f"]), possible["a"]), possible["b"]), possible["d"]);
+            } else if (nbrs.length === 5) {
+                possible["d"] = getIntersect(possible["d"], nbrs);
+                if (possible["e"].length != 0) {
+                    possible["e"] = getIntersect(getANotinB(nbrs, possible["e"]), possible["e"]);
                 } else {
-                    possible["g"] = getANotinB(nbrs, possible["a"])
+                    possible["e"] = getANotinB(nbrs, possible["e"]);
                 }
-
-            } else {
-                possible["f"] = getIntersect(possible["f"], nbrs)
                 if (possible["g"].length != 0) {
-                    possible["g"] = getIntersect(getANotinB(nbrs, possible["a"]), possible["g"])
+                    possible["g"] = getIntersect(getANotinB(nbrs, possible["a"]), possible["g"]);
                 } else {
-                    possible["g"] = getANotinB(nbrs, possible["a"])
+                    possible["g"] = getANotinB(nbrs, possible["a"]);
+                }
+            } else if (nbrs.length === 6) {
+                possible["f"] = getIntersect(possible["f"], nbrs);
+                possible["a"] = getIntersect(possible["a"], nbrs);
+                if (possible["g"].length != 0) {
+                    possible["g"] = getIntersect(getANotinB(nbrs, possible["a"]), possible["g"]);
+                } else {
+                    possible["g"] = getANotinB(nbrs, possible["a"]);
                 }
             }
         }
 
-        let keys = ["a", "b", "c", "d", "e", "f", "g"]
-        for (let key of keys) {
+        for (let key in possible) {
             if (possible[key].length === 1) {
-                for (let other of keys) {
+                for (let other in possible) {
                     if (other != key) {
-                        possible[other] = getANotinB(possible[other], possible[key])
+                        possible[other] = getANotinB(possible[other], possible[key]);
                     }
                 }
             }
         }
-        for (let so of sol) {
-            if (so.length === 2) {
-                counter += 1
-            } else if (so.length === 3) {
-                counter += 7
-            } else if (so.length === 4) {
-                counter += 4
-            } else if (so.length === 7) {
-                counter += 8
-            } else if (!so.includes(possible["f"]) && !so.includes(possible["b"])) {
-                counter += 2
-            } else if (!so.includes(possible["b"]) && !so.includes(possible["e"])) {
-                counter += 3
-            } else if (!so.includes(possible["c"]) && !so.includes(possible["e"])) {
-                counter += 5
-            } else if (so.includes(possible["e"]) && !so.includes(possible["c"])) {
-                counter += 6
-            } else if (so.includes(possible["e"])) {
-                counter += 0
-            } else {
-                counter += 9
-            }
-        }
-        sum += Number(counter)
-        counter = ""
+
+        convertDisplayStringToNumber(sol, possible)
+        sum += Number(counter);
+        counter = "";
     }
     return sum;
 }
