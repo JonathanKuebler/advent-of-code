@@ -1,88 +1,43 @@
 import * as fs from 'fs';
 
-let smallest = 0;
-
 function load_input(): number[][] {
-    let tmp = fs.readFileSync('input', 'utf8').split("\n")
-    let input = tmp.map(x => x.split("").map(Number))
-    return input
+    let input = fs.readFileSync('input', 'utf8').split("\n").map(x => x.split("").map(Number))
+
+    //This was not my Idea but it makes the most sense to get rid of my If-else
+    //madness.
+    for (let line of input) {
+        line.push(9);
+        line.unshift(9);
+    }
+    let line = Array(input[0].length).fill(9);
+    input.push(line);
+    input.unshift(line);
+    return input;
 }
 
-function makeBasin(map: number[][], y: number, x: number, setNumber: number): number[][] {
-    map[y][x] = setNumber
-    return map
-}
-
-
-function checkAdjacent() {
-
-    let input = load_input()
-    let basins = input
-    let lowest = 0;
-    let smallest = -1;
+function findBasinSeeds(): [number[][], number] {
+    let input = load_input();
+    let basins = input;
+    let numberOfLowest = 0;
+    let basinSeed = -1;
 
     for (let Ypos = 0; Ypos < input.length; Ypos++) {
         for (let Xpos = 0; Xpos < input[0].length; Xpos++) {
             let current = input[Ypos][Xpos]
-            if (Ypos === 0) {
-                if (Xpos === 0) {
-                    if (current < input[Ypos][Xpos + 1] && current < input[Ypos + 1][Xpos]) {
-                        basins = makeBasin(basins, Ypos, Xpos, smallest);
-                        smallest--
-                        lowest += current + 1;
-                    }
-                } else if (Xpos === input[0].length - 1) {
-                    if (current < input[Ypos][Xpos - 1] && current < input[Ypos + 1][Xpos]) {
-                        basins = makeBasin(basins, Ypos, Xpos, smallest);
-                        smallest--
-                        lowest += current + 1;
-                    }
-                } else if (current < input[Ypos][Xpos + 1] && current < input[Ypos + 1][Xpos] && current < input[Ypos][Xpos - 1]) {
-                    basins = makeBasin(basins, Ypos, Xpos, smallest);
-                    smallest--
-                    lowest += current + 1;
-                }
-            } else if (Ypos === input.length - 1) {
-                if (Xpos === 0) {
-                    if (current < input[Ypos][Xpos + 1] && current < input[Ypos - 1][Xpos]) {
-                        basins = makeBasin(basins, Ypos, Xpos, smallest);
-                        smallest--
-                        lowest += current + 1;
-                    }
-                } else if (Xpos === input[0].length - 1) {
-                    if (current < input[Ypos][Xpos - 1] && current < input[Ypos - 1][Xpos]) {
-                        basins = makeBasin(basins, Ypos, Xpos, smallest);
-                        smallest--
-                        lowest += current + 1;
-                    }
-                } else if (current < input[Ypos][Xpos + 1] && current < input[Ypos - 1][Xpos] && current < input[Ypos][Xpos - 1]) {
-                    basins = makeBasin(basins, Ypos, Xpos, smallest);
-                    smallest--
-                    lowest += current + 1;
-                }
-            } else {
-                if (Xpos === 0) {
-                    if (current < input[Ypos][Xpos + 1] && current < input[Ypos - 1][Xpos] && current < input[Ypos + 1][Xpos]) {
-                        basins = makeBasin(basins, Ypos, Xpos, smallest);
-                        smallest--
-                        lowest += current + 1;
-                    }
-                } else if (Xpos === input[0].length - 1) {
-                    if (current < input[Ypos][Xpos - 1] && current < input[Ypos - 1][Xpos] && current < input[Ypos + 1][Xpos]) {
-                        basins = makeBasin(basins, Ypos, Xpos, smallest);
-                        smallest--
-                        lowest += current + 1;
-                    }
-                } else if (current < input[Ypos][Xpos + 1] && current < input[Ypos - 1][Xpos] && current < input[Ypos][Xpos - 1] && current < input[Ypos + 1][Xpos]) {
-                    basins = makeBasin(basins, Ypos, Xpos, smallest);
-                    smallest--
-                    lowest += current + 1;
-                }
+            if (input[Ypos][Xpos] === 9) {
+                continue;
+            } else if (current < input[Ypos][Xpos + 1] &&
+                current < input[Ypos - 1][Xpos] &&
+                current < input[Ypos][Xpos - 1] &&
+                current < input[Ypos + 1][Xpos]) {
+                basins[Ypos][Xpos] = basinSeed;
+                basinSeed--
+                numberOfLowest += current + 1;
             }
         }
     }
 
-    return basins;
+    return [basins, numberOfLowest];
 }
 
 function mergeBasins(basins: number[][], oldValue: number, newValue: number): number[][] {
@@ -96,131 +51,32 @@ function mergeBasins(basins: number[][], oldValue: number, newValue: number): nu
     return basins
 }
 
-function checkForMerge(basins: number[][], YposCur: number, XposCur: number, YposNew: number, XposNew: number): number[][] {
+function flowOneDirection(basins: number[][], YposCur: number, XposCur: number, YposNew: number, XposNew: number): number[][] {
     if (basins[YposNew][XposNew] != basins[YposCur][XposCur] && basins[YposNew][XposNew] < 0) {
-        basins = mergeBasins(basins, basins[YposNew][XposNew], basins[YposCur][XposCur])
+        basins = mergeBasins(basins, basins[YposNew][XposNew], basins[YposCur][XposCur]);
+    } else {
+        basins[YposNew][XposNew] = basins[YposCur][XposCur];
     }
     return basins
 }
 
 
-let basins = checkAdjacent()
-function createBasins(basins: number[][]) {
+function letItFlow(basins: number[][]) {
     for (let Ypos = 0; Ypos < basins.length; Ypos++) {
         for (let Xpos = 0; Xpos < basins[0].length; Xpos++) {
             if (basins[Ypos][Xpos] < 0) {
-                let value = basins[Ypos][Xpos]
-                if (Ypos === 0) {
-                    if (Xpos === 0) {
-                        if (9 != basins[Ypos][Xpos + 1]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos, Xpos + 1)
-                            basins = makeBasin(basins, Ypos, Xpos + 1, value);
-                        }
-                        if (9 != basins[Ypos + 1][Xpos]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos + 1, Xpos)
-                            basins = makeBasin(basins, Ypos + 1, Xpos, value);
-                        }
-                    } else if (Xpos === basins[0].length - 1) {
-                        if (9 != basins[Ypos][Xpos - 1]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos, Xpos - 1)
-                            basins = makeBasin(basins, Ypos, Xpos - 1, value);
-                        }
-                        if (9 != basins[Ypos + 1][Xpos]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos + 1, Xpos)
-                            basins = makeBasin(basins, Ypos + 1, Xpos, value);
-                        }
-                    } else {
-                        if (9 != basins[Ypos][Xpos + 1]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos, Xpos + 1)
-                            basins = makeBasin(basins, Ypos, Xpos + 1, value)
-                        }
-                        if (9 != basins[Ypos + 1][Xpos]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos + 1, Xpos)
-                            basins = makeBasin(basins, Ypos + 1, Xpos, value)
-                        }
-                        if (9 != basins[Ypos][Xpos - 1]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos, Xpos - 1)
-                            basins = makeBasin(basins, Ypos, Xpos - 1, value);
-                        }
-                    }
-                } else if (Ypos === basins.length - 1) {
-                    if (Xpos === 0) {
-                        if (9 != basins[Ypos][Xpos + 1]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos, Xpos + 1)
-                            basins = makeBasin(basins, Ypos, Xpos + 1, value);
-                        }
-                        if (9 != basins[Ypos - 1][Xpos]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos - 1, Xpos + 1)
-                            basins = makeBasin(basins, Ypos - 1, Xpos, value);
-                        }
-                    } else if (Xpos === basins[0].length - 1) {
-                        if (9 != basins[Ypos][Xpos - 1]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos, Xpos - 1)
-                            basins = makeBasin(basins, Ypos, Xpos - 1, value);
-                        }
-                        if (9 != basins[Ypos - 1][Xpos]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos - 1, Xpos)
-                            basins = makeBasin(basins, Ypos - 1, Xpos, value);
-                        }
-                    } else {
-                        if (9 != basins[Ypos][Xpos + 1]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos, Xpos + 1)
-                            basins = makeBasin(basins, Ypos, Xpos + 1, value)
-                        }
-                        if (9 != basins[Ypos - 1][Xpos]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos - 1, Xpos)
-                            basins = makeBasin(basins, Ypos - 1, Xpos, value)
-                        }
-                        if (9 != basins[Ypos][Xpos - 1]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos, Xpos - 1)
-                            basins = makeBasin(basins, Ypos, Xpos - 1, value);
-                        }
-                    }
-                } else {
-                    if (Xpos === 0) {
-                        if (9 != basins[Ypos][Xpos + 1]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos, Xpos + 1)
-                            basins = makeBasin(basins, Ypos, Xpos + 1, value)
-                        }
-                        if (9 != basins[Ypos - 1][Xpos]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos - 1, Xpos)
-                            basins = makeBasin(basins, Ypos - 1, Xpos, value)
-                        }
-                        if (9 != basins[Ypos + 1][Xpos]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos + 1, Xpos)
-                            basins = makeBasin(basins, Ypos + 1, Xpos, value);
-                        }
-                    } else if (Xpos === basins[0].length - 1) {
-                        if (9 != basins[Ypos][Xpos - 1]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos, Xpos - 1)
-                            basins = makeBasin(basins, Ypos, Xpos - 1, value)
-                        }
-                        if (9 != basins[Ypos - 1][Xpos]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos - 1, Xpos)
-                            basins = makeBasin(basins, Ypos - 1, Xpos, value)
-                        }
-                        if (9 != basins[Ypos + 1][Xpos]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos + 1, Xpos)
-                            basins = makeBasin(basins, Ypos + 1, Xpos, value);
-                        }
-                    } else {
-                        if (9 != basins[Ypos][Xpos + 1]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos, Xpos + 1)
-                            basins = makeBasin(basins, Ypos, Xpos + 1, value)
-                        }
-                        if (9 != basins[Ypos][Xpos - 1]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos, Xpos - 1)
-                            basins = makeBasin(basins, Ypos, Xpos - 1, value)
-                        }
-                        if (9 != basins[Ypos - 1][Xpos]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos - 1, Xpos)
-                            basins = makeBasin(basins, Ypos - 1, Xpos, value);
-                        }
-                        if (9 != basins[Ypos + 1][Xpos]) {
-                            checkForMerge(basins, Ypos, Xpos, Ypos + 1, Xpos)
-                            basins = makeBasin(basins, Ypos + 1, Xpos, value);
-                        }
-                    }
+                let basinSeed = basins[Ypos][Xpos]
+                if (basins[Ypos - 1][Xpos] != 9) {
+                    flowOneDirection(basins, Ypos, Xpos, Ypos - 1, Xpos)
+                }
+                if (basins[Ypos + 1][Xpos] != 9) {
+                    flowOneDirection(basins, Ypos, Xpos, Ypos + 1, Xpos)
+                }
+                if (basins[Ypos][Xpos - 1] != 9) {
+                    flowOneDirection(basins, Ypos, Xpos, Ypos, Xpos - 1)
+                }
+                if (basins[Ypos][Xpos + 1] != 9) {
+                    flowOneDirection(basins, Ypos, Xpos, Ypos, Xpos + 1)
                 }
             }
         }
@@ -228,38 +84,35 @@ function createBasins(basins: number[][]) {
     return basins
 }
 
-for (let i = 0; i < 10; i++) {
-    basins = createBasins(basins)
-}
-let lst = basins.reduce((accumulator, value) => accumulator.concat(value), [])
-let set = new Set(lst)
-
-let counter: any = {}
-
-for (let el of set) {
-    for (let y = 0; y < basins.length; y++) {
-        for (let x = 0; x < basins[0].length; x++) {
-            if (basins[y][x] === el && basins[y][x] != 9) {
-                if (counter[el]) {
-                    counter[el] += 1
-                } else {
-                    counter[el] = 1
-                }
-            }
-        }
+function createBasins(basins: number[][]): number[][] {
+    let numberOfBasins = basins.reduce((accumulator, value) => accumulator.concat(value), [])
+    while (numberOfBasins.filter(function (x: number) { return x > -1 && x != 9 }).length > 1) {
+        basins = letItFlow(basins)
+        numberOfBasins = basins.reduce((accumulator, value) => accumulator.concat(value), [])
     }
+    return basins
 }
 
-var items = Object.keys(counter).map(function (key) {
-    return [key, counter[key]];
-});
+function solutionPart2(basins: number[][]): number {
+    let counter: any = {}
+    let list = basins.reduce((accumulator, value) => accumulator.concat(value), [])
+    for (const num of list) {
+        counter[num] = counter[num] ? counter[num] + 1 : 1;
+    }
 
-items = items.sort(function (first: number[], second: number[]) {
-    return second[1] - first[1];
-});
-items = items.slice(0, 3)
-let result = 1;
-for (let key of items) {
-    result = result * Number(key[1])
+    var result = Object.keys(counter).map(function (key) {
+        return [key, counter[key]];
+    });
+
+    result = result.sort(function (first, second) {
+        return second[1] - first[1];
+    });
+
+    return result.slice(1, 4).map(x => x[1]).reduce((x, y) => x * y);
 }
-console.log(result)
+
+let [basins, solutionPart1] = findBasinSeeds()
+
+console.log(solutionPart1)
+
+console.log(solutionPart2(createBasins(basins)))
